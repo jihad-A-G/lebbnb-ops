@@ -1,0 +1,56 @@
+# Docker Compose Production Override
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+services:
+  mongodb:
+    # Don't expose MongoDB port to host in production
+    ports: []
+    # Add resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    # Restart on failure
+    restart: always
+
+  backend:
+    # Add resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    # Restart on failure
+    restart: always
+    # Read-only root filesystem for security (except uploads)
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/.npm
+    volumes:
+      - uploads_data:/app/uploads:rw
+
+  frontend:
+    # Add resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    # Restart on failure
+    restart: always
+    # Read-only root filesystem for security
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/.next/cache

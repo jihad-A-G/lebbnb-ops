@@ -1,0 +1,7 @@
+# Ignore backend folder
+Lebbnb-backend/
+
+# Ignore other unnecessary files
+*.log
+.env.local
+.DS_Store

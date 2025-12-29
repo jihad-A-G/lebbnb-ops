@@ -1,0 +1,123 @@
+services:
+  # ================================
+  # MongoDB Database
+  # ================================
+  mongodb:
+    image: mongo:7
+    container_name: lebbnb-mongodb
+    restart: unless-stopped
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-lebbnb}
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    networks:
+      - lebbnb-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  # ================================
+  # Backend API Service
+  # ================================
+  backend:
+    build:
+      context: ./Lebbnb-backend
+      dockerfile: Dockerfile
+    container_name: lebbnb-backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-5000}:5000"
+    environment:
+      # Application
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 5000
+      
+      # Database
+      MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongodb:27017/${MONGO_DATABASE:-lebbnb}?authSource=admin
+      
+      # CORS - Allow frontend to communicate
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      
+      # JWT Configuration
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_ACCESS_EXPIRY: ${JWT_ACCESS_EXPIRY:-15m}
+      JWT_REFRESH_EXPIRY: ${JWT_REFRESH_EXPIRY:-7d}
+      
+      # Email Configuration
+      GMAIL_USER: ${GMAIL_USER}
+      GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD}
+      COMPANY_NAME: ${COMPANY_NAME:-Lebbnb}
+    volumes:
+      # Persist uploaded files
+      - uploads_data:/app/uploads
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - lebbnb-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ================================
+  # Frontend Application
+  # ================================
+  frontend:
+    build:
+      context: ./lebbnb-frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:5000/api}
+    container_name: lebbnb-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:5000/api}
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - lebbnb-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+# ================================
+# Volumes
+# ================================
+volumes:
+  # MongoDB data persistence
+  mongodb_data:
+    driver: local
+  
+  # MongoDB configuration persistence
+  mongodb_config:
+    driver: local
+  
+  # Backend uploads (images, videos, etc.)
+  uploads_data:
+    driver: local
+
+# ================================
+# Networks
+# ================================
+networks:
+  lebbnb-network:
+    driver: bridge

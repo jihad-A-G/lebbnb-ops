@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # MongoDB service (for local development)
+  mongodb:
+    image: mongo:7
+    container_name: lebbnb-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_DATABASE: lebbnb
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - lebbnb-network
+
+  # Backend API service
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lebbnb-api
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - MONGODB_URI=mongodb://admin:admin123@mongodb:27017/lebbnb?authSource=admin
+      - CORS_ORIGIN=http://localhost:3000
+    env_file:
+      - .env
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      - mongodb
+    networks:
+      - lebbnb-network
+
+volumes:
+  mongodb_data:
+    driver: local
+
+networks:
+  lebbnb-network:
+    driver: bridge

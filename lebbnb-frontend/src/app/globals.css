@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+:root {
+  --primary-green: #425b30;
+  --primary-green-light: #6b8f52;
+  --primary-green-dark: #2f4222;
+  --accent-green: #557141;
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Animations */
+@keyframes gradient {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient {
+  animation: gradient 8s ease infinite;
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-[#425b30] to-[#6b8f52] bg-clip-text text-transparent;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-r from-[#425b30] to-[#557141] text-white px-6 py-3 rounded-lg font-semibold transition-all hover:shadow-lg hover:scale-105 active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply border-2 border-[#425b30] text-[#425b30] px-6 py-3 rounded-lg font-semibold transition-all hover:bg-[#425b30] hover:text-white;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-100;
+  }
+}
+
