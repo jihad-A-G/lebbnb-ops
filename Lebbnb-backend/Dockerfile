@@ -12,9 +12,10 @@ COPY package*.json ./
 # Install ALL dependencies (including devDependencies for building)
 RUN npm ci && npm cache clean --force
 
-# Copy TypeScript config and source code
+# Copy TypeScript config, source code, and scripts
 COPY tsconfig.json ./
 COPY src ./src
+COPY scripts ./scripts
 
 # Build TypeScript
 RUN npm run build
@@ -42,6 +43,9 @@ RUN npm ci --only=production && npm cache clean --force
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
+
+# Copy scripts for admin creation
+COPY --from=builder /app/scripts ./scripts
 
 # Create uploads directory with proper permissions
 RUN mkdir -p uploads && \
