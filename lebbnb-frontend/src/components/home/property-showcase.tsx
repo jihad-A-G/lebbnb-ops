@@ -21,7 +21,7 @@ export function PropertyShowcase({ properties }: PropertyShowcaseProps) {
 
   // Get all images from properties for a dynamic slideshow
   const allImages = properties.flatMap(property =>
-    property.images.slice(0, 2).map(img => ({
+    (property.images || []).slice(0, 2).map(img => ({
       url: `${API_URL}/uploads/${img}`,
       propertyId: property._id,
       title: property.title,

@@ -23,13 +23,13 @@ export function PropertyCarousel({ properties }: PropertyCarouselProps) {
 
   // Flatten all images with property info
   const carouselItems = properties.flatMap(property =>
-    property.images?.map((img, idx) => ({
+    (property.images || []).map((img, idx) => ({
       url: `${API_URL}/uploads/${img}`,
       propertyId: property._id,
       propertyTitle: property.title,
       propertyAddress: property.address,
       imageIndex: idx,
-      totalImages: property.images.length
+      totalImages: (property.images || []).length
     }))
   );
 

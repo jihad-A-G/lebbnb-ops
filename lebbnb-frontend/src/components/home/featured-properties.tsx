@@ -17,7 +17,7 @@ export function FeaturedProperties({ properties }: FeaturedPropertiesProps) {
 
   // Collect all images from all properties for a dynamic gallery
   const allImages = properties.flatMap(property => 
-    property.images.map(img => ({
+    (property.images || []).map(img => ({
       url: `${API_URL}/uploads/${img}`,
       propertyId: property._id,
       propertyTitle: property.title,
