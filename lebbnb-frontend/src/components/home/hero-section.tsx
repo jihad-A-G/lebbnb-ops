@@ -23,15 +23,27 @@ export function HeroSection({ data }: HeroSectionProps) {
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Video Background */}
       <div className="absolute inset-0 w-full h-full">
+        {/* Loading placeholder */}
+        {!isVideoLoaded && (
+          <div className="absolute inset-0 bg-gradient-to-br from-black via-[#2f4222] to-black animate-pulse" />
+        )}
+        
         <video
           autoPlay
           loop
           muted
           playsInline
+          preload="metadata"
+          poster="/video-poster.jpg"
           onLoadedData={() => setIsVideoLoaded(true)}
-          className="absolute inset-0 w-full h-full object-cover"
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+            isVideoLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+          style={{ willChange: 'opacity' }}
         >
+          <source src="/hero-video-optimized.mp4" type="video/mp4" />
           <source src="/WhatsApp Video 2025-12-14 at 10.02.45 PM.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
         </video>
         {/* Dark overlay for better text readability */}
         <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-[#2f4222]/80" />
