@@ -36,13 +36,15 @@ const imageFilter = (_req: Express.Request, file: Express.Multer.File, cb: multe
   }
 };
 
-// Configure multer
+// Configure multer with optimized settings for concurrent uploads
 export const upload = multer({
   storage: storage,
   fileFilter: imageFilter,
   limits: {
-    fileSize: 50 * 1024 * 1024, // 50MB max file size
-    files: 100 // Maximum 100 files at once
+    fileSize: 50 * 1024 * 1024, // 50MB max per file
+    files: 20, // Maximum 20 files per request (reduced for better performance)
+    fieldSize: 2 * 1024 * 1024, // 2MB max field size
+    parts: 25 // Maximum number of non-file fields
   }
 });
 

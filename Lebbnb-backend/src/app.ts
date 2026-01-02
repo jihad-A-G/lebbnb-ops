@@ -61,9 +61,18 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('combined'));
 }
 
-// Body parser middleware
+// Body parser middleware with increased timeout for large uploads
 app.use(express.json({ limit: '500mb' }));
 app.use(express.urlencoded({ extended: true, limit: '500mb' }));
+
+// Set server timeout for long-running requests (10 minutes)
+// This ensures Node.js doesn't kill the connection during large uploads
+app.use((req: Request, res: Response, next: NextFunction) => {
+  // Set timeout to 10 minutes (600000ms)
+  req.setTimeout(600000);
+  res.setTimeout(600000);
+  next();
+});
 
 // Data sanitization against NoSQL injection
 app.use(mongoSanitize());
