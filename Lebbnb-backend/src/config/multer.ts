@@ -58,14 +58,38 @@ export const deleteFile = (filename: string): void => {
   try {
     const filePath = path.join(uploadsDir, filename);
     if (fs.existsSync(filePath)) {
+      const stats = fs.statSync(filePath);
+      const sizeMB = (stats.size / 1024 / 1024).toFixed(2);
       fs.unlinkSync(filePath);
+      console.log(`🗑️  Deleted file: ${filename} (${sizeMB} MB)`);
+    } else {
+      console.warn(`⚠️  File not found, already deleted: ${filename}`);
     }
   } catch (error) {
-    console.error('Error deleting file:', error);
+    console.error(`❌ Error deleting file ${filename}:`, error);
   }
 };
 
 // Utility function to delete multiple files
 export const deleteFiles = (filenames: string[]): void => {
-  filenames.forEach(filename => deleteFile(filename));
+  console.log(`\n🗑️  Deleting ${filenames.length} files...`);
+  let deletedCount = 0;
+  let totalSize = 0;
+  
+  filenames.forEach(filename => {
+    try {
+      const filePath = path.join(uploadsDir, filename);
+      if (fs.existsSync(filePath)) {
+        const stats = fs.statSync(filePath);
+        totalSize += stats.size;
+        fs.unlinkSync(filePath);
+        deletedCount++;
+      }
+    } catch (error) {
+      console.error(`Error deleting ${filename}:`, error);
+    }
+  });
+  
+  const totalSizeMB = (totalSize / 1024 / 1024).toFixed(2);
+  console.log(`✅ Deleted ${deletedCount}/${filenames.length} files (${totalSizeMB} MB freed)\n`);
 };

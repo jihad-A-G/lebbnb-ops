@@ -136,18 +136,26 @@ export const deleteProperty = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    // Delete associated images
+    console.log(`\n🗑️  Deleting property: ${galleryItem.title} (ID: ${galleryItem._id})`);
+
+    // Delete associated images from disk
     if (galleryItem.images && galleryItem.images.length > 0) {
+      console.log(`   Found ${galleryItem.images.length} images to delete`);
       deleteFiles(galleryItem.images);
+    } else {
+      console.log(`   No images to delete`);
     }
 
+    // Delete property from database
     await galleryItem.deleteOne();
+    console.log(`✅ Property deleted successfully\n`);
 
     res.status(200).json({
       status: 'success',
       message: 'Gallery item deleted successfully'
     });
   } catch (error: any) {
+    console.error('❌ Failed to delete property:', error);
     res.status(500).json({
       status: 'error',
       message: 'Failed to delete gallery item',
