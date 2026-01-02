@@ -10,6 +10,8 @@ const COMPRESSION_OPTIONS = {
   useWebWorker: true, // Use web worker for better performance
   fileType: 'image/jpeg', // Convert all to JPEG for better compression
   initialQuality: 0.8, // 80% quality - good balance
+  alwaysKeepResolution: false, // Allow downscaling for better compression
+  preserveExif: false, // Remove EXIF data to reduce size
 };
 
 /**
@@ -34,16 +36,23 @@ export async function compressImage(
       onProgress: onProgress,
     });
 
-    const compressedSize = compressedFile.size / 1024 / 1024;
-    const savedPercent = Math.round(((file.size - compressedFile.size) / file.size) * 100);
+    // Ensure the file has the correct name with .jpg extension
+    const fileName = file.name.replace(/\.[^/.]+$/, '') + '.jpg';
+    const renamedFile = new File([compressedFile], fileName, {
+      type: 'image/jpeg',
+      lastModified: Date.now(),
+    });
+
+    const compressedSize = renamedFile.size / 1024 / 1024;
+    const savedPercent = Math.round(((file.size - renamedFile.size) / file.size) * 100);
 
     console.log(
-      `✓ Compressed: ${file.name} | ` +
+      `✓ Compressed: ${file.name} → ${fileName} | ` +
       `${originalSize.toFixed(2)}MB → ${compressedSize.toFixed(2)}MB | ` +
-      `Saved ${savedPercent}%`
+      `Saved ${savedPercent}% | Type: ${renamedFile.type}`
     );
 
-    return compressedFile;
+    return renamedFile;
   } catch (error) {
     console.error(`Error compressing ${file.name}:`, error);
     // Return original file if compression fails

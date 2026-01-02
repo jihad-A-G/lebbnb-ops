@@ -24,15 +24,20 @@ const storage = multer.diskStorage({
 });
 
 // File filter for images only
+// More lenient to accept browser-compressed images which may have generic MIME types
 const imageFilter = (_req: Express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   const allowedTypes = /jpeg|jpg|png|gif|webp/;
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
   const mimetype = allowedTypes.test(file.mimetype);
-
-  if (extname && mimetype) {
+  
+  // Accept if extension matches (browser compression may change MIME type)
+  // OR if MIME type matches (standard uploads)
+  if (extname || mimetype) {
+    console.log(`✓ Accepted file: ${file.originalname} (${file.mimetype})`);
     cb(null, true);
   } else {
-    cb(new Error('Only image files are allowed (jpeg, jpg, png, gif, webp)'));
+    console.error(`✗ Rejected file: ${file.originalname} (${file.mimetype})`);
+    cb(new Error(`Only image files are allowed. Got: ${file.originalname} with type ${file.mimetype}`));
   }
 };
 
