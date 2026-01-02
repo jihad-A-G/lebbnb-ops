@@ -3,6 +3,13 @@
 # ================================
 FROM node:20-alpine AS builder
 
+# Install build dependencies for Sharp (image processing library)
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    vips-dev
+
 # Set working directory
 WORKDIR /app
 
@@ -24,6 +31,9 @@ RUN npm run build
 # Production Stage
 # ================================
 FROM node:20-alpine
+
+# Install runtime dependencies for Sharp
+RUN apk add --no-cache vips
 
 # Install dumb-init to handle signals properly
 RUN apk add --no-cache dumb-init

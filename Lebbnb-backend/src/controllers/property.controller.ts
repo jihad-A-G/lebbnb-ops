@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import Gallery from '../models/Property.model';
 import { deleteFiles } from '../config/multer';
+import { optimizeImages } from '../utils/imageOptimizer';
+import path from 'path';
 
 // Get all gallery items (Public)
 export const getAllProperties = async (req: Request, res: Response): Promise<void> => {
@@ -175,6 +177,22 @@ export const uploadPropertyImages = async (req: Request, res: Response): Promise
       return;
     }
 
+    console.log(`📤 Received ${req.files.length} images for optimization...`);
+
+    // Optimize images in parallel after upload
+    try {
+      const uploadsDir = path.join(__dirname, '../../uploads');
+      const filePaths = req.files.map((file: Express.Multer.File) => 
+        path.join(uploadsDir, file.filename)
+      );
+      
+      await optimizeImages(filePaths);
+    } catch (optimizeError: any) {
+      console.error('Image optimization failed:', optimizeError.message);
+      // Continue even if optimization fails - images are still uploaded
+      console.warn('⚠️  Proceeding with unoptimized images');
+    }
+
     // Get filenames
     const filenames = req.files.map((file: Express.Multer.File) => file.filename);
     
@@ -184,7 +202,7 @@ export const uploadPropertyImages = async (req: Request, res: Response): Promise
 
     res.status(200).json({
       status: 'success',
-      message: 'Images uploaded successfully',
+      message: 'Images uploaded and optimized successfully',
       data: {
         uploadedImages: filenames,
         totalImages: galleryItem.images.length
