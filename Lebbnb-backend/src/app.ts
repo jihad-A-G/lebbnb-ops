@@ -65,12 +65,12 @@ if (process.env.NODE_ENV !== 'production') {
 app.use(express.json({ limit: '500mb' }));
 app.use(express.urlencoded({ extended: true, limit: '500mb' }));
 
-// Set server timeout for long-running requests (10 minutes)
+// Set server timeout for long-running requests (15 minutes)
 // This ensures Node.js doesn't kill the connection during large uploads
 app.use((req: Request, res: Response, next: NextFunction) => {
-  // Set timeout to 10 minutes (600000ms)
-  req.setTimeout(600000);
-  res.setTimeout(600000);
+  // Set timeout to 15 minutes (900000ms)
+  req.setTimeout(900000);
+  res.setTimeout(900000);
   next();
 });
 

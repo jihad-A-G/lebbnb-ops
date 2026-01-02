@@ -15,12 +15,12 @@ const startServer = async () => {
       console.log(`🔗 Health check: http://localhost:${PORT}/health`);
     });
 
-    // Increase server timeout to 10 minutes for large file uploads
-    server.timeout = 600000; // 10 minutes in milliseconds
-    server.keepAliveTimeout = 610000; // Slightly higher than timeout
-    server.headersTimeout = 620000; // Slightly higher than keepAliveTimeout
+    // Increase server timeout to 15 minutes for large file uploads
+    server.timeout = 900000; // 15 minutes in milliseconds
+    server.keepAliveTimeout = 910000; // Slightly higher than timeout
+    server.headersTimeout = 920000; // Slightly higher than keepAliveTimeout
     
-    console.log('⏱️  Server timeouts configured: 10 minutes for uploads');
+    console.log('⏱️  Server timeouts configured: 15 minutes for uploads');
   } catch (error) {
     console.error('Failed to start server:', error);
     process.exit(1);
